@@ -45,6 +45,22 @@
   });
 
   /* ------------------------------------------------------------ animated diagrams */
+  /* ------------------------------------------------------------ PowerPoint export (code loads on first use) */
+  var pptxLoading = null;
+  LIW.exportPptx = function (scope) {
+    var meta = $('meta[name="liw-pptx"]'); if (!meta) return;
+    var epEl = $('#ep-data'), ep = null;
+    if (epEl) { try { ep = JSON.parse(epEl.textContent).id; } catch (e) { } }
+    function go() { LIW.pptx.open({ scope: scope || (ep ? 'episode' : 'all'), ep: ep, data: meta.getAttribute('data-comic'), icons: meta.getAttribute('data-icons') }); }
+    if (LIW.pptx) { go(); return; }
+    if (!pptxLoading) pptxLoading = new Promise(function (res, rej) { var sc = document.createElement('script'); sc.src = meta.getAttribute('content'); sc.onload = res; sc.onerror = function () { pptxLoading = null; rej(); }; document.head.appendChild(sc); });
+    pptxLoading.then(go, function () { alert('The PowerPoint exporter could not load. Check your connection and try again.'); });
+  };
+  document.addEventListener('click', function (ev) {
+    var b = ev.target.closest && ev.target.closest('[data-pptx]'); if (!b) return;
+    ev.preventDefault(); ev.stopPropagation(); LIW.exportPptx(b.getAttribute('data-pptx'));
+  });
+
   var SVGNS = 'http://www.w3.org/2000/svg', XL = 'http://www.w3.org/1999/xlink';
   var KIND = { req: '#06b6d4', resp: '#f59e0b', block: '#ef4444', policy: '#8b5cf6', data: '#10b981', alert: '#f97316', money: '#ca8a04' };
   LIW.KIND = KIND;
@@ -463,7 +479,7 @@
       var done = JSON.parse(store.get('liw-done', '[]')); if (done.indexOf(D.id) < 0) { done.push(D.id); store.set('liw-done', JSON.stringify(done)); }
       var nx = D.next ? '<div class="nx"><img src="' + A + 'panels/' + D.next.thumb + '-sm.webp" alt=""><div style="text-align:left"><span class="kick">Up next · ' + esc(D.next.n) + '</span><h3>' + esc(D.next.title) + '</h3><a class="btn primary" href="' + D.next.href + (auto ? '?autoplay=1&speed=' + speed : '') + '">Read it ▶</a></div></div>' : '<p class="big">🎉 You finished the whole story!</p>';
       showBoard('<div class="endc"><span class="kick">' + esc(D.n) + ' complete</span><p class="big">✔ ' + esc(D.title) + '</p>' + nx +
-        '<div class="go" style="justify-content:center"><button class="btn" data-go="restart">↺ Read again</button><a class="btn" href="index.html#episodes">All episodes</a><a class="btn" href="cheatsheet.html">Cheat sheet</a><a class="btn" href="sources.html#' + D.id + '">Sources</a></div></div>');
+        '<div class="go" style="justify-content:center"><button class="btn" data-go="restart">↺ Read again</button><a class="btn" href="index.html#episodes">All episodes</a><a class="btn" href="cheatsheet.html">Cheat sheet</a><a class="btn" href="sources.html#' + D.id + '">Sources</a><button class="btn" data-pptx="episode">⬇ PowerPoint</button></div></div>');
       if (auto && D.next) { timer = setTimeout(function () { location.href = D.next.href + '?autoplay=1&speed=' + speed; }, 6000 / speed); }
     }
     function addLog(c, b) {
@@ -495,6 +511,7 @@
     $$('[data-act="comic"]').forEach(function (b) { b.addEventListener('click', toggleText); });
     function full() { var d = document; if (!d.fullscreenElement) { (d.documentElement.requestFullscreen || function () { }).call(d.documentElement); } else d.exitFullscreen(); }
     $('#bFull').addEventListener('click', full);
+    $('#bPptx').addEventListener('click', function () { setAuto(false); });
     board.addEventListener('click', function (ev) {
       var o = ev.target.closest('.opt'); if (o && !o.disabled) { clearTimeout(timer); revealQuiz(+o.dataset.i); return; }
       var g = ev.target.closest('[data-go]'); if (!g) return;
@@ -504,6 +521,7 @@
     });
     document.addEventListener('keydown', function (ev) {
       if (ev.altKey || ev.ctrlKey || ev.metaKey) return;
+      if (document.querySelector('.xp-ov')) return; // the export dialog has the keyboard
       var t = ev.target; if (t && (t.tagName === 'SELECT' || t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
       var k = ev.key;
       if (k === 'ArrowRight' || k === ' ' || k === 'PageDown') { if (t && t.tagName === 'BUTTON' && k === ' ') return; ev.preventDefault(); next(); }
@@ -514,6 +532,7 @@
       else if (k === 't' || k === 'T') toggleText();
       else if (k === 'f' || k === 'F') full();
       else if (k === 'm' || k === 'M') LIW.toggleMotion();
+      else if (k === 'p' || k === 'P') { setAuto(false); LIW.exportPptx('episode'); }
       else if (k === 'Escape') { $('#log').classList.remove('on'); document.body.classList.remove('text-mode'); }
     });
     document.addEventListener('liw-motion', function () { if (cur >= 0 && !ov.classList.contains('on')) { /* keep state */ } });

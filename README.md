@@ -10,6 +10,7 @@ Contoso is moving to Azure, and Dewi has to lead it. Over 16 animated episodes s
 - **Auto-play:** press **A** (or open `e00.html?autoplay=1`, add `&speed=1.5` to go faster). Episodes chain automatically.
 - **17 animated architecture diagrams** drawn with the official Azure Architecture Icons: glowing packets travel each connection hop by hop, with a caption for every step. See them all on [diagrams.html](https://ibranibeny.github.io/contoso-waf-caf-comic/diagrams.html).
 - **Checkpoint quiz** at the end of every episode, a [cheat sheet](https://ibranibeny.github.io/contoso-waf-caf-comic/cheatsheet.html) and a [sources page](https://ibranibeny.github.io/contoso-waf-caf-comic/sources.html).
+- **Export to PowerPoint:** the **⬇ PowerPoint** button (or **P** in an episode) builds an animated `.pptx` in the browser for one episode, the whole comic or all 17 diagrams: one slide per beat with Morph transitions and typed speech, lesson cards, quizzes, editable diagrams with official Azure icons and packets that fly along motion paths, and speaker notes on every slide. Nothing is uploaded anywhere.
 - **Reduced motion:** if your device asks for reduced motion, the comic starts still and offers **Play animations**; your choice is remembered, and **M** toggles it. **T** opens a full text version of every episode.
 
 ## Episodes (one continuous story, about 133 minutes)
